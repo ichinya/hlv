@@ -170,14 +170,26 @@ pub fn extract_json_blocks(text: &str) -> Vec<String> {
 pub fn extract_section_raw<'a>(text: &'a str, section_title: &str) -> Option<&'a str> {
     let target = format!("## {}", section_title);
     let mut start = None;
+    let mut byte_pos = 0;
+    let mut line_offsets: Vec<usize> = Vec::new(); // byte offset of each line start
+
+    // Pre-compute line start offsets to handle both \n and \r\n
+    for line in text.split('\n') {
+        line_offsets.push(byte_pos);
+        byte_pos += line.len() + 1; // +1 for the '\n'
+    }
+
     for (idx, line) in text.lines().enumerate() {
         let trimmed = line.trim();
         if trimmed == target || trimmed.starts_with(&format!("{}  ", target)) {
-            // Find byte offset of the next line after this heading
-            let byte_start: usize = text.lines().take(idx + 1).map(|l| l.len() + 1).sum();
+            let byte_start = if idx + 1 < line_offsets.len() {
+                line_offsets[idx + 1]
+            } else {
+                text.len()
+            };
             start = Some(byte_start.min(text.len()));
         } else if start.is_some() && trimmed.starts_with("## ") {
-            let byte_end: usize = text.lines().take(idx).map(|l| l.len() + 1).sum();
+            let byte_end = line_offsets[idx];
             return Some(&text[start.unwrap()..byte_end.min(text.len())]);
         }
     }
