@@ -409,7 +409,13 @@ pub fn run_meta(
 ///
 /// Adds a new task to both stage_N.md and milestones.yaml tracker.
 /// If the stage is `implemented` or `validated`, it auto-reopens to `implementing`.
-pub fn run_add(root: &Path, stage_id: u32, task_id: &str, name: &str) -> Result<()> {
+pub fn run_add(
+    root: &Path,
+    stage_id: u32,
+    task_id: &str,
+    name: &str,
+    description: Option<&str>,
+) -> Result<()> {
     let mut map = load(root)?;
     let current = map.current.as_mut().context("No active milestone")?;
     let milestone_id = current.id.clone();
@@ -452,7 +458,14 @@ pub fn run_add(root: &Path, stage_id: u32, task_id: &str, name: &str) -> Result<
     anyhow::ensure!(stage_path.exists(), "stage_{}.md not found", stage_id);
 
     let content = std::fs::read_to_string(&stage_path)?;
-    let task_entry = format!("\n{} {}\n  contracts: []\n", task_id, name);
+    let task_entry = if let Some(desc) = description {
+        format!(
+            "\n{} {}\n  contracts: []\n  description: {}\n",
+            task_id, name, desc
+        )
+    } else {
+        format!("\n{} {}\n  contracts: []\n", task_id, name)
+    };
 
     // Insert before ## Remediation if present, else append to Tasks section
     let new_content = if let Some(pos) = content.find("## Remediation") {

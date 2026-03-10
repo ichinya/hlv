@@ -215,8 +215,9 @@ pub fn hlv_task_add(
     stage_id: u32,
     task_id: &str,
     name: &str,
+    description: Option<&str>,
 ) -> Result<CallToolResult, McpError> {
-    quiet(|| crate::cmd::task::run_add(root, stage_id, task_id, name))
+    quiet(|| crate::cmd::task::run_add(root, stage_id, task_id, name, description))
         .map_err(|e| mcp_err("task add failed", e))?;
     text_ok(format!("Task '{task_id}' added to stage {stage_id}"))
 }

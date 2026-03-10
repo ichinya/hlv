@@ -743,7 +743,7 @@ fn task_add_to_pending_stage() {
     }];
     save_milestones(root, &map);
 
-    hlv::cmd::task::run_add(root, 1, "TASK-002", "New feature").unwrap();
+    hlv::cmd::task::run_add(root, 1, "TASK-002", "New feature", None).unwrap();
 
     let map = load_milestones(root);
     let stage = &map.current.as_ref().unwrap().stages[0];
@@ -795,7 +795,7 @@ fn task_add_auto_reopens_implemented_stage() {
     }];
     save_milestones(root, &map);
 
-    hlv::cmd::task::run_add(root, 1, "TASK-002", "Fix bug").unwrap();
+    hlv::cmd::task::run_add(root, 1, "TASK-002", "Fix bug", None).unwrap();
 
     let map = load_milestones(root);
     let stage = &map.current.as_ref().unwrap().stages[0];
@@ -836,7 +836,7 @@ fn task_add_duplicate_fails() {
     }];
     save_milestones(root, &map);
 
-    let result = hlv::cmd::task::run_add(root, 1, "TASK-001", "Duplicate");
+    let result = hlv::cmd::task::run_add(root, 1, "TASK-001", "Duplicate", None);
     assert!(result.is_err());
     assert!(result.unwrap_err().to_string().contains("already exists"));
 }
@@ -869,7 +869,7 @@ fn task_add_invalid_id_fails() {
     }];
     save_milestones(root, &map);
 
-    let result = hlv::cmd::task::run_add(root, 1, "BAD-001", "Wrong prefix");
+    let result = hlv::cmd::task::run_add(root, 1, "BAD-001", "Wrong prefix", None);
     assert!(result.is_err());
     assert!(result.unwrap_err().to_string().contains("TASK- or FIX-"));
 }
@@ -902,7 +902,7 @@ fn task_add_fix_id_works() {
     }];
     save_milestones(root, &map);
 
-    hlv::cmd::task::run_add(root, 1, "FIX-001", "Fix validation error").unwrap();
+    hlv::cmd::task::run_add(root, 1, "FIX-001", "Fix validation error", None).unwrap();
 
     let map = load_milestones(root);
     let stage = &map.current.as_ref().unwrap().stages[0];
@@ -912,6 +912,97 @@ fn task_add_fix_id_works() {
         stage.status,
         StageStatus::Implementing,
         "Validating should auto-reopen"
+    );
+}
+
+#[test]
+fn task_add_with_description() {
+    let tmp = TempDir::new().unwrap();
+    let root = tmp.path();
+    setup_project(root);
+
+    let milestone_id = load_milestones(root).current.unwrap().id;
+    let stage_dir = root.join("human/milestones").join(&milestone_id);
+
+    fs::write(
+        stage_dir.join("stage_1.md"),
+        "# Stage 1: Foundation\n\n## Tasks\n\nTASK-001 First\n  contracts: []\n\n## Remediation\n",
+    )
+    .unwrap();
+
+    let mut map = load_milestones(root);
+    let current = map.current.as_mut().unwrap();
+    current.stages = vec![StageEntry {
+        id: 1,
+        scope: "Foundation".to_string(),
+        status: StageStatus::Pending,
+        commit: None,
+        tasks: vec![TaskTracker::new("TASK-001".to_string())],
+        labels: Vec::new(),
+        meta: HashMap::new(),
+    }];
+    save_milestones(root, &map);
+
+    hlv::cmd::task::run_add(
+        root,
+        1,
+        "TASK-002",
+        "New feature",
+        Some("Implement the new feature with full validation"),
+    )
+    .unwrap();
+
+    // Check milestones.yaml
+    let map = load_milestones(root);
+    let stage = &map.current.as_ref().unwrap().stages[0];
+    assert_eq!(stage.tasks.len(), 2);
+    assert_eq!(stage.tasks[1].id, "TASK-002");
+
+    // Check stage_1.md contains description
+    let content = fs::read_to_string(stage_dir.join("stage_1.md")).unwrap();
+    assert!(content.contains("TASK-002 New feature"));
+    assert!(content.contains("description: Implement the new feature with full validation"));
+    // Task should be before Remediation
+    let task_pos = content.find("TASK-002").unwrap();
+    let rem_pos = content.find("## Remediation").unwrap();
+    assert!(task_pos < rem_pos);
+}
+
+#[test]
+fn task_add_without_description_no_description_line() {
+    let tmp = TempDir::new().unwrap();
+    let root = tmp.path();
+    setup_project(root);
+
+    let milestone_id = load_milestones(root).current.unwrap().id;
+    let stage_dir = root.join("human/milestones").join(&milestone_id);
+
+    fs::write(
+        stage_dir.join("stage_1.md"),
+        "# Stage 1: Foundation\n\n## Tasks\n\nTASK-001 First\n  contracts: []\n\n## Remediation\n",
+    )
+    .unwrap();
+
+    let mut map = load_milestones(root);
+    let current = map.current.as_mut().unwrap();
+    current.stages = vec![StageEntry {
+        id: 1,
+        scope: "Foundation".to_string(),
+        status: StageStatus::Pending,
+        commit: None,
+        tasks: vec![TaskTracker::new("TASK-001".to_string())],
+        labels: Vec::new(),
+        meta: HashMap::new(),
+    }];
+    save_milestones(root, &map);
+
+    hlv::cmd::task::run_add(root, 1, "TASK-002", "Simple task", None).unwrap();
+
+    let content = fs::read_to_string(stage_dir.join("stage_1.md")).unwrap();
+    assert!(content.contains("TASK-002 Simple task"));
+    assert!(
+        !content.contains("description:"),
+        "No description line when None"
     );
 }
 

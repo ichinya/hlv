@@ -160,8 +160,10 @@ struct TaskAddParams {
     stage_id: u32,
     /// Task ID (e.g. TASK-012 or FIX-001)
     task_id: String,
-    /// Task name/description
+    /// Task name
     name: String,
+    /// Task description (optional, written to stage_N.md)
+    description: Option<String>,
 }
 
 #[derive(Deserialize, schemars::JsonSchema, Default)]
@@ -464,7 +466,13 @@ impl HlvMcpServer {
         Parameters(p): Parameters<TaskAddParams>,
     ) -> Result<CallToolResult, McpError> {
         let root = self.root(p.project_id.as_deref())?;
-        tools::hlv_task_add(&root, p.stage_id, &p.task_id, &p.name)
+        tools::hlv_task_add(
+            &root,
+            p.stage_id,
+            &p.task_id,
+            &p.name,
+            p.description.as_deref(),
+        )
     }
 
     #[tool(description = "List tasks with optional filters by stage, status, or label")]

@@ -244,6 +244,9 @@ enum TaskAction {
         /// Stage number
         #[arg(long)]
         stage: u32,
+        /// Task description
+        #[arg(long)]
+        description: Option<String>,
     },
     /// Sync tasks from stage_N.md plans
     Sync {
@@ -669,9 +672,12 @@ fn run(cli: Cli) -> Result<()> {
                 label.as_deref(),
                 json,
             ),
-            TaskAction::Add { id, name, stage } => {
-                hlv::cmd::task::run_add(&project_root, stage, &id, &name)
-            }
+            TaskAction::Add {
+                id,
+                name,
+                stage,
+                description,
+            } => hlv::cmd::task::run_add(&project_root, stage, &id, &name, description.as_deref()),
             TaskAction::Start { id } => hlv::cmd::task::run_start(&project_root, &id),
             TaskAction::Done { id } => hlv::cmd::task::run_done(&project_root, &id),
             TaskAction::Block { id, reason } => {

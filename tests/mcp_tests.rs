@@ -1066,7 +1066,7 @@ fn tool_task_add() {
     }];
     save_milestones(root, &map);
 
-    let result = hlv::mcp::tools::hlv_task_add(root, 1, "TASK-002", "Fix bug").unwrap();
+    let result = hlv::mcp::tools::hlv_task_add(root, 1, "TASK-002", "Fix bug", None).unwrap();
     let text = tool_text(&result);
     assert!(text.contains("TASK-002"), "Expected task ID in: {text}");
 
@@ -1093,7 +1093,7 @@ fn tool_task_add_duplicate_fails() {
 
     add_stage_with_tasks(root);
 
-    let err = hlv::mcp::tools::hlv_task_add(root, 1, "TASK-001", "Dup").unwrap_err();
+    let err = hlv::mcp::tools::hlv_task_add(root, 1, "TASK-001", "Dup", None).unwrap_err();
     assert!(
         format!("{err:?}").contains("task add failed"),
         "Expected task add error, got: {err:?}"

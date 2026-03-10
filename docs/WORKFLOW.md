@@ -569,7 +569,7 @@ hlv task done <TASK-ID>      # marks task as done
 hlv task block <ID> --reason "..."   # manual block
 hlv task unblock <ID>        # remove block
 hlv task status [--json]     # summary across stages
-hlv task add <ID> <name> --stage <N>  # add task (auto-reopens stage)
+hlv task add <ID> <name> --stage <N> [--description "..."]  # add task (auto-reopens stage)
 hlv task sync [--force]      # sync with stage_N.md
 hlv task label <ID> add|remove <label>
 hlv task meta <ID> set|delete <key> [<value>]

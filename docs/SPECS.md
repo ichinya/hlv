@@ -64,7 +64,7 @@ Stage reopen transitions (via `hlv stage reopen <N>`):
 
 Task statuses: `pending` -> `in_progress` -> `done`, or `blocked` (manual block with reason)
 
-New tasks can be added mid-flight via `hlv task add <ID> <name> --stage <N>`. If the stage is `implemented`, `validated`, or `validating`, it auto-reopens to `implementing`.
+New tasks can be added mid-flight via `hlv task add <ID> <name> --stage <N> [--description "..."]`. If the stage is `implemented`, `validated`, or `validating`, it auto-reopens to `implementing`. The optional `--description` flag writes a `description:` field into the task entry in `stage_N.md`.
 
 `labels` and `meta` on milestone, stage, and task are arbitrary tags and key-value data for clients (Kanban, dashboards). HLV does not use them in core logic.
 
