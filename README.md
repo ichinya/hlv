@@ -8,6 +8,9 @@
 
 **Specs first. Code second. Proof always.**
 
+> [!WARNING]
+> This project is under active development. Breaking changes may happen between releases.
+
 You define the *what*. LLMs generate the *how*. hlv validates the *proof*.
 
 A compiled Rust binary that keeps LLM-generated code on a leash — validating every file, every milestone, every gate in seconds. Because prompts are not guarantees.
