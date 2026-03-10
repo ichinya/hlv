@@ -8,7 +8,7 @@
       name="description"
       content="Specs first. Code second. Proof always. A static landing page version of the HLV Pencil frame."
     />
-    <link rel="stylesheet" href="./styles.css?v=13" />
+    <link rel="stylesheet" href="./styles.css?v=20" />
     <script defer src="./script.js?v=2"></script>
   </head>
   <body>
@@ -27,6 +27,7 @@
           aria-controls="site-nav"
           aria-label="Toggle navigation"
         >
+          <span></span>
           <span></span>
           <span></span>
         </button>
@@ -885,6 +886,76 @@ $ hlv workflow</code></pre>
               <div class="comparison-table__hlv-cell">All mandatory gates passed</div>
             </div>
           </div>
+        </section>
+
+        <section class="section section--dark" id="hlv-vs-ai-factory">
+          <div class="section-heading section-heading--center" data-reveal>
+            <h2>AI Factory vs HLV: where each wins</h2>
+            <p>
+              AI Factory is the fast path for the majority of teams. HLV is the strict
+              harness for high-stakes projects where every detail must be deliberate.
+            </p>
+          </div>
+
+          <div class="comparison-table comparison-table--three comparison-table--aif" data-reveal>
+            <div class="comparison-table__row comparison-table__row--head comparison-table__row--three">
+              <div>CRITERIA</div>
+              <div class="comparison-table__aif-head">AI FACTORY</div>
+              <div class="comparison-table__hlv-head">HLV</div>
+            </div>
+            <div class="comparison-table__row comparison-table__row--three">
+              <div>Coverage</div>
+              <div class="comparison-table__aif-cell">
+                Best fit for ~90% of delivery tasks and workflow automation needs.
+              </div>
+              <div class="comparison-table__hlv-cell">
+                Built for quality-critical projects where randomness is unacceptable.
+              </div>
+            </div>
+            <div class="comparison-table__row comparison-table__row--three">
+              <div>Project type</div>
+              <div class="comparison-table__aif-cell">
+                Works with both new projects and existing codebases.
+              </div>
+              <div class="comparison-table__hlv-cell">
+                Only for new projects where the entire <code>llm/</code> code layer is owned by the LLM.
+              </div>
+            </div>
+            <div class="comparison-table__row comparison-table__row--three">
+              <div>Primary role</div>
+              <div class="comparison-table__aif-cell">
+                Workflow engine + configuration assistance for quick adoption.
+              </div>
+              <div class="comparison-table__hlv-cell">
+                Spec-driven harness with human-authored context, constraints, and gates.
+              </div>
+            </div>
+            <div class="comparison-table__row comparison-table__row--three">
+              <div>Human effort</div>
+              <div class="comparison-table__aif-cell">
+                Fast start to offload most routine work to workflows.
+              </div>
+              <div class="comparison-table__hlv-cell">
+                Heavy human input into context design, architecture decisions, and gate configuration.
+              </div>
+            </div>
+            <div class="comparison-table__row comparison-table__row--three">
+              <div>Development style</div>
+              <div class="comparison-table__aif-cell">
+                Practical acceleration for everyday execution.
+              </div>
+              <div class="comparison-table__hlv-cell">
+                Not vibe coding: conscious AI development where each step is intentional.
+              </div>
+            </div>
+          </div>
+
+          <blockquote class="quote-card" data-reveal style="max-width: 860px">
+            <p>
+              AI Factory gives fast leverage. HLV gives deterministic confidence.
+              Use HLV when every gate, every contract, and every trace link must hold.
+            </p>
+          </blockquote>
         </section>
 
         <section class="section section--dark" id="audience">
