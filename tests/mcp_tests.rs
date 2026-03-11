@@ -1683,6 +1683,8 @@ fn subscribe_unsubscribe_via_server() {
                 .await
                 .unwrap();
             assert_eq!(resp.status(), 200);
+            let _ = resp.text().await.unwrap();
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
 
             // 4. Verify subscription stored
             {
@@ -1709,6 +1711,8 @@ fn subscribe_unsubscribe_via_server() {
                 .await
                 .unwrap();
             assert_eq!(resp.status(), 200);
+            let _ = resp.text().await.unwrap();
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
 
             // 6. Verify unsubscribed
             {
