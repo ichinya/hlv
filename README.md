@@ -191,6 +191,8 @@ hlv mcp --transport sse --port 3000
 
 **Web Dashboard example:** [hlv-dashboard-example](https://github.com/lee-to/hlv-dashboard-example) — a reference implementation of the [Dashboard spec](docs/specs/SPEC_DASHBOARD.md) built with HLV MCP.
 
+**Build your own:** the [docs/specs/](docs/specs/) directory contains detailed specifications you can use to build custom integrations on top of HLV MCP.
+
 ## AI agent skills
 
 Built-in skills drive the full development lifecycle:
