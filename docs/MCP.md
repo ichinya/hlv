@@ -468,7 +468,24 @@ let client = ().serve(transport).await?;
 
 Workspace mode lets one MCP server serve multiple HLV projects.
 
-### Configuration
+### Managing workspaces
+
+```bash
+hlv workspace init                              # create ~/.hlv/workspace.yaml
+hlv workspace add                               # add current directory (ID = dir name)
+hlv workspace add my-api                        # add current directory with explicit ID
+hlv workspace add my-api --root /path/to/proj   # add specific path
+hlv workspace remove my-api                     # remove project from workspace
+hlv workspace list                              # show all projects
+```
+
+Use `--config <path>` to use a non-default workspace file:
+
+```bash
+hlv workspace --config ~/custom-ws.yaml add
+```
+
+### Configuration format
 
 ```yaml
 # ~/.hlv/workspace.yaml

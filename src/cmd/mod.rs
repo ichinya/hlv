@@ -15,3 +15,4 @@ pub mod style;
 pub mod task;
 pub mod trace;
 pub mod workflow;
+pub mod workspace;

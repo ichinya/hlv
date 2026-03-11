@@ -45,6 +45,25 @@ impl WorkspaceConfig {
         Ok(config)
     }
 
+    /// Load without requiring at least one project (for workspace management commands).
+    pub fn load_lenient(path: &Path) -> Result<Self> {
+        let text = std::fs::read_to_string(path)
+            .with_context(|| format!("Cannot read workspace config: {}", path.display()))?;
+        let config: Self = serde_yaml::from_str(&text)
+            .with_context(|| format!("Invalid workspace YAML: {}", path.display()))?;
+        // Only validate duplicate IDs, not emptiness
+        let mut seen = std::collections::HashSet::new();
+        for p in &config.projects {
+            anyhow::ensure!(!p.id.is_empty(), "Project ID must not be empty");
+            anyhow::ensure!(
+                seen.insert(&p.id),
+                "Duplicate project ID in workspace: '{}'",
+                p.id
+            );
+        }
+        Ok(config)
+    }
+
     /// Validate that workspace config is well-formed.
     fn validate(&self) -> Result<()> {
         anyhow::ensure!(

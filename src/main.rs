@@ -142,6 +142,15 @@ enum Commands {
         #[command(subcommand)]
         action: StageAction,
     },
+    /// Manage MCP workspace (multi-project config)
+    Workspace {
+        #[command(subcommand)]
+        action: WorkspaceAction,
+
+        /// Path to workspace config (default: ~/.hlv/workspace.yaml)
+        #[arg(long, global = true)]
+        config: Option<String>,
+    },
     /// Start MCP (Model Context Protocol) server
     Mcp {
         /// Transport: stdio (default) or sse
@@ -324,6 +333,27 @@ enum StageAction {
 }
 
 #[derive(Subcommand)]
+enum WorkspaceAction {
+    /// Initialize workspace config file
+    Init,
+    /// Add a project to the workspace
+    Add {
+        /// Project ID (defaults to directory name)
+        id: Option<String>,
+        /// Project root path (defaults to current directory)
+        #[arg(long)]
+        root: Option<String>,
+    },
+    /// Remove a project from the workspace
+    Remove {
+        /// Project ID to remove
+        id: String,
+    },
+    /// List projects in the workspace
+    List,
+}
+
+#[derive(Subcommand)]
 enum GatesAction {
     /// Enable a gate
     Enable {
@@ -499,6 +529,20 @@ fn run(cli: Cli) -> Result<()> {
             agent.as_deref(),
             profile.as_deref(),
         );
+    }
+
+    // Workspace commands don't need a project root
+    if let Commands::Workspace { action, config } = cli.command {
+        return match action {
+            WorkspaceAction::Init => hlv::cmd::workspace::run_init(config.as_deref()),
+            WorkspaceAction::Add { id, root } => {
+                hlv::cmd::workspace::run_add(id.as_deref(), root.as_deref(), config.as_deref())
+            }
+            WorkspaceAction::Remove { id } => {
+                hlv::cmd::workspace::run_remove(&id, config.as_deref())
+            }
+            WorkspaceAction::List => hlv::cmd::workspace::run_list(config.as_deref()),
+        };
     }
 
     // MCP may run in workspace mode (no project root needed)
@@ -717,6 +761,7 @@ fn run(cli: Cli) -> Result<()> {
             ),
         },
         Commands::Mcp { .. } => unreachable!(),
+        Commands::Workspace { .. } => unreachable!(),
         Commands::Stage { action } => match action {
             StageAction::Reopen { id } => hlv::cmd::stage::run_reopen(&project_root, id),
             StageAction::Label { id, action, label } => {
