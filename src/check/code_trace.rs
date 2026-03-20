@@ -211,6 +211,28 @@ def test_sql():
     }
 
     #[test]
+    fn check_code_trace_disabled_returns_empty() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        fs::create_dir_all(root.join("llm/src")).unwrap();
+
+        // Even with contracts that would produce diagnostics, disabled markers = empty
+        let contracts = vec![ContractEntry {
+            id: "test.contract".to_string(),
+            version: "1.0.0".to_string(),
+            path: "contracts/test.md".to_string(),
+            yaml_path: Some("contracts/test.yaml".to_string()),
+            owner: None,
+            status: crate::model::project::ContractStatus::Implemented,
+            test_spec: None,
+            depends_on: vec![],
+            artifacts: vec![],
+        }];
+        let diags = check_code_trace(root, &contracts, &[], "llm/src", None, false);
+        assert!(diags.is_empty(), "markers disabled = no diagnostics");
+    }
+
+    #[test]
     fn check_code_trace_empty_contracts() {
         let dir = tempfile::tempdir().unwrap();
         let root = dir.path();
