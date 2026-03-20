@@ -40,3 +40,4 @@ git:
 features:
   linear_architecture: true
   hlv_markers: true
+  security_markers: true

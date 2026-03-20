@@ -4,6 +4,7 @@ pub mod contracts;
 pub mod llm_map;
 pub mod plan;
 pub mod project_map;
+pub mod sec_markers;
 pub mod stack;
 pub mod tasks;
 pub mod traceability;

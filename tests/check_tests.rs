@@ -8,6 +8,7 @@ use hlv::check::contracts::check_contracts;
 use hlv::check::llm_map::check_llm_map;
 use hlv::check::plan::check_stage_plans;
 use hlv::check::project_map::check_project_map;
+use hlv::check::sec_markers::check_sec_markers;
 use hlv::check::stack::check_stack;
 use hlv::check::traceability::check_traceability;
 use hlv::check::validation::check_test_specs;
@@ -3944,4 +3945,84 @@ rules:
     }]);
     let diags = check_constraints(tmp.path(), &project);
     assert!(!has_any_error(&diags), "expected no errors: {:?}", diags);
+}
+
+// ═══════════════════════════════════════════════════════
+// SEC-010: Security attention markers
+// ═══════════════════════════════════════════════════════
+
+#[test]
+fn sec_markers_present_returns_sec010_info() {
+    let tmp = TempDir::new().unwrap();
+    let root = tmp.path();
+
+    fs::create_dir_all(root.join("llm/src")).unwrap();
+    fs::write(
+        root.join("llm/src/handler.rs"),
+        r#"
+// @hlv:sec [INPUT_VALIDATION] — user email in query
+fn validate_email() {}
+
+// @hlv:sec [AUTH_BOUNDARY] — session check
+fn check_auth() {}
+"#,
+    )
+    .unwrap();
+
+    let diags = check_sec_markers(root, "llm/src", true);
+    assert!(
+        has_info(&diags, "SEC-010"),
+        "should have SEC-010 info: {:?}",
+        diags
+    );
+    let sec010 = diags.iter().find(|d| d.code == "SEC-010").unwrap();
+    assert!(sec010.message.contains("2 total"));
+}
+
+#[test]
+fn sec_markers_no_markers_returns_empty() {
+    let tmp = TempDir::new().unwrap();
+    let root = tmp.path();
+
+    fs::create_dir_all(root.join("llm/src")).unwrap();
+    fs::write(root.join("llm/src/main.rs"), "fn main() {}").unwrap();
+
+    let diags = check_sec_markers(root, "llm/src", true);
+    assert!(diags.is_empty(), "no markers = no diags: {:?}", diags);
+}
+
+#[test]
+fn sec_markers_invalid_category_warns() {
+    let tmp = TempDir::new().unwrap();
+    let root = tmp.path();
+
+    fs::create_dir_all(root.join("llm/src")).unwrap();
+    fs::write(
+        root.join("llm/src/main.rs"),
+        "// @hlv:sec [INVALID_CAT] — bad category",
+    )
+    .unwrap();
+
+    let diags = check_sec_markers(root, "llm/src", true);
+    assert!(
+        has_warning(&diags, "SEC-011"),
+        "should warn on invalid category: {:?}",
+        diags
+    );
+}
+
+#[test]
+fn sec_markers_disabled_returns_empty() {
+    let tmp = TempDir::new().unwrap();
+    let root = tmp.path();
+
+    fs::create_dir_all(root.join("llm/src")).unwrap();
+    fs::write(
+        root.join("llm/src/main.rs"),
+        "// @hlv:sec [INPUT_VALIDATION] — should be ignored",
+    )
+    .unwrap();
+
+    let diags = check_sec_markers(root, "llm/src", false);
+    assert!(diags.is_empty(), "disabled = no diagnostics: {:?}", diags);
 }
