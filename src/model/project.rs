@@ -27,6 +27,28 @@ pub struct ProjectMap {
     pub stack: Option<Stack>,
     #[serde(default)]
     pub git: GitPolicy,
+    #[serde(default)]
+    pub features: Features,
+}
+
+// ── Features ────────────────────────────────────────────
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(deny_unknown_fields)]
+pub struct Features {
+    #[serde(default = "default_true")]
+    pub linear_architecture: bool,
+    #[serde(default = "default_true")]
+    pub hlv_markers: bool,
+}
+
+impl Default for Features {
+    fn default() -> Self {
+        Self {
+            linear_architecture: true,
+            hlv_markers: true,
+        }
+    }
 }
 
 // ── Git Policy ──────────────────────────────────────────
@@ -513,6 +535,7 @@ type: some_new_type
             validation: None,
             stack: None,
             git: GitPolicy::default(),
+            features: Features::default(),
         };
 
         pm.save(&path).unwrap();
@@ -556,6 +579,7 @@ type: some_new_type
             validation: None,
             stack: None,
             git: GitPolicy::default(),
+            features: Features::default(),
         };
 
         pm.add_constraint(ConstraintEntry {
