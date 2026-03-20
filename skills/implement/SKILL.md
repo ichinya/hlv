@@ -17,8 +17,9 @@ Execute the implementation plan: agents perform tasks from milestone stage files
 Before proceeding, read `project.yaml → features` and note the flag values:
 - `features.linear_architecture` (default: `true`)
 - `features.hlv_markers` (default: `true`)
+- `features.security_markers` (default: `true`)
 
-These flags control which sections below are active. If `project.yaml` has no `features` section, treat both as `true`.
+These flags control which sections below are active. If `project.yaml` has no `features` section, treat all as `true`.
 
 ## CRITICAL: Code Architecture Philosophy
 
@@ -376,6 +377,61 @@ $ hlv check
     ! WRN [CTR-010] error 'OUT_OF_STOCK' from order.create has no @hlv marker in code
     ! WRN [CTR-010] constraint 'no_secrets_in_logs' from security.global has no @hlv marker in code
     · INF [CTR-001] Code traceability: 7/9 markers covered
+```
+
+## Security Attention Markers (`@hlv:sec`)
+
+> **Conditional: `features.security_markers: true`**
+> If `security_markers` is `false` in project.yaml, skip this entire section. No `@hlv:sec` markers are required and `hlv check` will not run SEC-010 diagnostics.
+
+When writing implementation code, mark security-sensitive spots with `@hlv:sec` markers. These are attention flags for heightened scrutiny during `/validate`.
+
+### Syntax
+
+```
+// @hlv:sec [CATEGORY] — free text reason
+```
+
+### Categories
+
+| Category | When to use |
+|----------|-------------|
+| `INPUT_VALIDATION` | User input parsing, sanitization, boundary checks |
+| `DESERIALIZATION` | Parsing external data (JSON, YAML, protobuf, etc.) |
+| `AUTH_BOUNDARY` | Authentication/authorization checks, session validation |
+| `SECRET_HANDLING` | API keys, tokens, passwords, PII in memory or logs |
+| `FILE_ACCESS` | File reads/writes, path traversal risks |
+| `CRYPTO` | Encryption, hashing, signing, random number generation |
+| `PRIVILEGE_ESCALATION` | Role changes, sudo/admin operations, capability grants |
+| `NETWORK` | HTTP requests, DNS, TLS, socket operations |
+
+### Examples
+
+```rust
+// @hlv:sec [INPUT_VALIDATION] — user-supplied email used in DB query
+fn create_user(email: &str) -> Result<User> { ... }
+
+// @hlv:sec [SECRET_HANDLING] — API key loaded from env, must not leak to logs
+let api_key = std::env::var("API_KEY")?;
+
+// @hlv:sec [AUTH_BOUNDARY] — session token validated before granting access
+fn verify_session(token: &str) -> Result<Session> { ... }
+```
+
+### Rules
+
+1. Place `@hlv:sec` markers in **implementation code** (not just tests) at the point where the security-sensitive operation happens.
+2. Use exactly one of the 8 categories above — `hlv check` warns on unknown categories (SEC-011).
+3. Add a brief reason after `—` explaining why this spot is security-sensitive.
+4. `hlv check` reports SEC-010 as Info: an aggregated summary table of markers by category and file count.
+
+### Verification
+
+```
+$ hlv check
+...
+  Security markers
+    · INF [SEC-010] Security markers: 5 total across 3 file(s) [AUTH_BOUNDARY=2, INPUT_VALIDATION=2, SECRET_HANDLING=1]
 ```
 
 ## Error handling

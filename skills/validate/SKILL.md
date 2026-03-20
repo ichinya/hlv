@@ -16,8 +16,9 @@ Execute all mandatory validation gates defined in `gates-policy.yaml`. Collect r
 
 Before proceeding, read `project.yaml → features` and note the flag values:
 - `features.hlv_markers` (default: `true`)
+- `features.security_markers` (default: `true`)
 
-This flag controls whether marker-related validation (Step 3b) is active. If `project.yaml` has no `features` section, treat as `true`.
+These flags control whether marker-related validation (Step 3b, 3c) is active. If `project.yaml` has no `features` section, treat all as `true`.
 
 ## Prerequisites
 
@@ -150,6 +151,30 @@ Check that every rule in rule-based constraint files (`human/constraints/*.yaml`
 `hlv check` also executes `check_command` for rules that define one (CST-050/CST-060). Review diagnostics: rules with `error_level: error` (or `critical`/`high` severity without an override) block release. Add failing checks to the remediation plan (Step 4a).
 
 For each critical rule without coverage, add it to the remediation plan (Step 4a).
+
+### Step 3c: Security Attention Audit (`@hlv:sec`)
+
+> **Conditional: `features.security_markers: true`**
+> If `security_markers` is `false` in project.yaml, skip this entire step. `hlv check` will not produce SEC-010 diagnostics.
+
+Audit all `@hlv:sec` markers in the source code and evaluate security handling quality:
+
+1. **Walk each marker**: For every `@hlv:sec [CATEGORY] — reason` in the codebase:
+   - Read the surrounding code (±20 lines).
+   - Evaluate whether the security concern described in the reason is adequately handled.
+   - Rate handling as: **adequate**, **weak** (present but incomplete), or **missing** (marker present but no handling).
+
+2. **Find unmarked spots**: Scan the codebase for security-sensitive patterns that lack `@hlv:sec` markers:
+   - User input flowing into queries or commands without sanitization.
+   - Secrets read from environment or config without protection.
+   - Authentication/authorization checks missing at boundaries.
+   - File operations with user-supplied paths.
+   - Cryptographic operations using weak algorithms or hardcoded keys.
+
+3. **Report**:
+   - Run `hlv check` and review SEC-010 (summary table) and SEC-011 (invalid categories) diagnostics.
+   - For each **weak** or **missing** handling, add a remediation item to Step 4a.
+   - For each unmarked security-sensitive spot found, recommend adding an `@hlv:sec` marker in the remediation plan.
 
 ### Step 4: Release decision and remediation plan
 

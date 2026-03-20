@@ -133,6 +133,12 @@ pub fn get_check_diagnostics(root: &Path) -> Result<(Vec<Diagnostic>, i32)> {
         ));
     }
 
+    all_diags.extend(check::sec_markers::check_sec_markers(
+        root,
+        &project.paths.llm.src,
+        project.features.security_markers,
+    ));
+
     if let Some(ref map_path) = project.paths.llm.map {
         all_diags.extend(check::llm_map::check_llm_map(root, map_path));
     }
@@ -335,6 +341,20 @@ fn run_checks(root: &Path) -> Result<i32> {
         );
         print_diags(&code_diags);
         all_diags.extend(code_diags);
+    }
+
+    // 7b. Security attention markers (@hlv:sec)
+    {
+        let sec_diags = check::sec_markers::check_sec_markers(
+            root,
+            &project.paths.llm.src,
+            project.features.security_markers,
+        );
+        if !sec_diags.is_empty() {
+            style::section("Security markers");
+            print_diags(&sec_diags);
+        }
+        all_diags.extend(sec_diags);
     }
 
     // 8. LLM map (llm/map.yaml)

@@ -70,6 +70,7 @@ $ hlv check
 | **Traceability** | REQ → CTR → TST → GATE chains, no dangling refs |
 | **Plan** | DAG without cycles, contract coverage |
 | **Code traceability** | `@hlv` markers in code match contract rules (skipped when `features.hlv_markers: false`) |
+| **Security markers** | `@hlv:sec` attention markers by category (skipped when `features.security_markers: false`) |
 | **LLM map** | every `map.yaml` entry exists on disk |
 | **Constraints** | rule IDs, severity validation |
 
@@ -148,9 +149,10 @@ HLV ships with opinionated defaults, but you can opt out via `project.yaml`:
 features:
   linear_architecture: true   # flat module structure, no layered arch
   hlv_markers: true            # @hlv code traceability markers + CTR-010/CTR-001
+  security_markers: true       # @hlv:sec security attention markers + SEC-010
 ```
 
-Both default to `true`. Set to `false` to use your preferred architecture style or skip `@hlv` markers entirely. `hlv init` asks about these during project setup.
+All default to `true`. Set to `false` to use your preferred architecture style, skip `@hlv` markers, or disable security attention markers. `hlv init` asks about these during project setup.
 
 ## Your best practices are LLM anti-patterns
 

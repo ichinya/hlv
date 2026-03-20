@@ -22,6 +22,37 @@ fn parse_project_yaml() {
 }
 
 #[test]
+fn parse_features_with_security_markers() {
+    let p = ProjectMap::load(&Path::new(FIXTURE).join("project.yaml")).unwrap();
+    assert!(p.features.linear_architecture);
+    assert!(p.features.hlv_markers);
+    assert!(p.features.security_markers);
+}
+
+#[test]
+fn features_security_markers_defaults_to_true() {
+    let yaml = r#"
+schema_version: 1
+project: test
+status: draft
+paths:
+  human:
+    glossary: human/glossary.yaml
+    constraints: human/constraints/
+  validation:
+    gates_policy: validation/gates-policy.yaml
+    scenarios: validation/scenarios/
+  llm:
+    src: llm/src/
+"#;
+    let p: ProjectMap = serde_yaml::from_str(yaml).unwrap();
+    assert!(
+        p.features.security_markers,
+        "security_markers should default to true"
+    );
+}
+
+#[test]
 fn parse_glossary() {
     let g = Glossary::load(&Path::new(FIXTURE).join("human/glossary.yaml")).unwrap();
     assert!(g.types.contains_key("UserId"));
