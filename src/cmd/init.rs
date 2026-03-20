@@ -298,7 +298,13 @@ pub fn run_with_milestone(
     write_template(
         root,
         "project.yaml",
-        &project_template(&project_name, &owner_name, linear_arch, hlv_markers, security_markers),
+        &project_template(
+            &project_name,
+            &owner_name,
+            linear_arch,
+            hlv_markers,
+            security_markers,
+        ),
     )?;
     write_template(root, "milestones.yaml", &milestones_template(&project_name))?;
     write_template(
